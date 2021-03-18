@@ -3,9 +3,9 @@ import sqlite3
 
 class DBHelper:
     def __init__(self, path: str):
-        #self._path = path
+        # self._path = path
         self._name = "learnables.db"
-        #self._full_path = self._path + "/" + self._name
+        # self._full_path = self._path + "/" + self._name
         self._connection = sqlite3.connect(self._name)
         self._cursor = self._connection.cursor()
 
@@ -55,53 +55,68 @@ class DBHelper:
     def get_cards(self):
         return list(self._cursor.execute("SELECT * FROM cards;"))
 
-    def get_card(self, c_id: int):
-        return list(self._cursor.execute(f"SELECT * FROM cards WHERE {c_id} == C_ID"))[0]
+    def get_card_by_id(self, c_id: int):
+        val = list(self._cursor.execute(f"SELECT * FROM cards WHERE C_ID == {c_id}"))[0]
+        return val
+
+    def get_card(self, front: str, back: str):
+        query = f"SELECT * FROM cards WHERE (Front == '{front}') and (Back == '{back}')"
+        val = list(self._cursor.execute(query))[0]
+        return val
 
     def get_decks(self):
         return list(self._cursor.execute("SELECT * FROM decks;"))
 
     def _get_deck_id(self, name: str):
-        return list(self._cursor.execute(f"SELECT id FROM decks WHERE {name} == Name"))[0]
+        return list(self._cursor.execute(f"SELECT id FROM decks WHERE Name == '{name}'"))[0]
 
     def get_subjects(self):
         return list(self._cursor.execute("SELECT * FROM subjects;"))
 
     def get_subject(self, subject: str = None, s_id: str = None):
         if subject is None:
-            return list(self._cursor.execute(f"SELECT Language from languages WHERE {s_id} == S_ID"))
+            return list(self._cursor.execute(f"SELECT Language from languages WHERE S_ID == {s_id}"))
 
         elif s_id is None:
-            return list(self._cursor.execute(f"SELECT Language from languages WHERE {subject} == Subject"))
+            return list(self._cursor.execute(f"SELECT Language from languages WHERE Subject == '{subject}'"))
 
         else:
             raise AttributeError
 
-    def create_card(self, front, back):
-        query = f"""
-                INSERT INTO cards (Front, Back)
-                VALUES ({front}, {back});
-                """
-
+    def create_card(self, front: str, back: str) -> tuple:
+        query = f"INSERT INTO cards (Front, Back) VALUES ('{front}', '{back}');"
+        print(query)
         self._cursor.execute(query)
+        self._connection.commit()
+
+        return self.get_card_by_id(self.get_card(front, back)[0])
 
     def create_deck(self, name: str, subject: str, cards: list):
         ids = [card.c_id for card in cards]
 
         query = f"""
                 INSERT INTO decks (Name, S_ID)
-                VALUES ({name}, {self.get_subject(subject=subject)};
+                VALUES ('{name}', '{self.get_subject(subject=subject)}';
                 """
 
         self._cursor.execute(query)
 
         for c_id in ids:
-            self._cursor.execute(f"INSERT INTO deck_lookup (D_ID, C_ID VALUES ({self._get_deck_id(name)}, {c_id}")
+            self._cursor.execute(f"INSERT INTO deck_lookup (D_ID, C_ID VALUES ('{self._get_deck_id(name)}', '{c_id}'")
+
+        self._connection.commit()
 
     def close_connection(self):
+        self._connection.commit()
         self._connection.close()
 
     def create_dummy_data(self):
+        test1 = self.get_subjects()
+        test2 = self.get_cards()
+
+        if len(test1) != 0 and len(test2) != 0:
+            return
+
         dummy_subjects = f"""
                 INSERT INTO subjects (subject)
                 VALUES
@@ -111,6 +126,7 @@ class DBHelper:
                     ("Politik"),
                     ("Informatik");
                 """
+
         dummy_cards = f"""
                 INSERT INTO cards (Front, Back)
                 VALUES
@@ -119,16 +135,17 @@ class DBHelper:
                     ("Front3", "Back3"),
                     ("Front4", "Back4"),
                     ("Front5", "Back5"),
-                    ("Front6", "Back6");"""
+                    ("Front6", "Back6");
+                """
 
         self._cursor.execute(dummy_subjects)
         self._cursor.execute(dummy_cards)
 
         if len(self.get_subjects()) != 0 and len(self.get_cards()) != 0:
+            self._connection.commit()
             return True
         else:
             return False
 
-
-#dbh = DBHelper(r"C:\Users\joshu\Desktop\Learnables")
-#dbh.create_dummy_data()
+# dbh = DBHelper(r"C:\Users\joshu\Desktop\Learnables")
+# dbh.create_dummy_data()

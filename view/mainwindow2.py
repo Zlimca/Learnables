@@ -9,7 +9,8 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QInputDialog
+from PyQt5.QtCore import Qt
 
 from controller.controller import Controller
 
@@ -17,8 +18,9 @@ from controller.controller import Controller
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow, controller):
         self.controller = controller
+        self.controller.on_startup()
 
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName("Learnables")
         MainWindow.resize(480, 640)
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -87,15 +89,19 @@ class Ui_MainWindow(object):
         self.verticalLayout_11 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_11.setObjectName("verticalLayout_11")
+
         self.scrollArea_5 = QtWidgets.QScrollArea(self.verticalLayoutWidget)
-        self.scrollArea_5.setWidgetResizable(False)
+        self.scrollArea_5.setWidgetResizable(True)
         self.scrollArea_5.setObjectName("scrollArea_5")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 447, 507))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollArea_5.setWidget(self.scrollAreaWidgetContents)
+        self.scrollArea_5.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scrollArea_5.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         self.verticalLayout_11.addWidget(self.scrollArea_5)
-        self.btn_add = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.btn_add = QtWidgets.QPushButton(self.verticalLayoutWidget, clicked=self.add_card)
         self.btn_add.setObjectName("btn_add")
         self.verticalLayout_11.addWidget(self.btn_add)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -221,10 +227,23 @@ class Ui_MainWindow(object):
         self.verticalStackedWidget.setCurrentIndex(1)
         cards = self.controller.get_cards()
         vbox = QtWidgets.QVBoxLayout()
-        # for card in cards:
-        #     vbox.addWidget(card)
+        for card in cards:
+            vbox.addWidget(card)
 
         self.scrollAreaWidgetContents.setLayout(vbox)
+
+    def add_card(self):
+        print(f"{self.controller.get_cards()}\n")
+        front, ok = QInputDialog.getText(self.verticalStackedWidget, "Neue Karte erstellen", "Vorderseite: ")
+        print(front)
+        if ok:
+            back, ok = QInputDialog.getText(self.verticalStackedWidget, "Neue Karte erstellen", "Rückseite: ")
+            print(back)
+            if ok:
+                new_card = self.controller.add_card(front, back)
+                print(f"front {front}, back {back}, card: {new_card}")
+                self.scrollAreaWidgetContents.layout().addWidget(new_card)
+                self.scrollAreaWidgetContents.update()
 
     def set_btn_actions(self):
         # self.btn_settings

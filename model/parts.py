@@ -12,7 +12,7 @@ class Subject:
 
 class Card(QLabel):
     def __init__(self, c_id: int, front: str, back: str, counter_r: int = 0, counter_w: int = 0):
-        super().__init__()
+        super().__init__(front)
         self.c_id = c_id
         self._is_front = True
         self.front = front
