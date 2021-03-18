@@ -1,0 +1,134 @@
+import sqlite3
+
+
+class DBHelper:
+    def __init__(self, path: str):
+        #self._path = path
+        self._name = "learnables.db"
+        #self._full_path = self._path + "/" + self._name
+        self._connection = sqlite3.connect(self._name)
+        self._cursor = self._connection.cursor()
+
+        self.create_db()
+
+    def create_db(self):
+        create_cards = """
+                    CREATE TABLE IF NOT EXISTS cards
+                        (C_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                        Front TEXT,
+                        Back TEXT,
+                        Counter_C INTEGER DEFAULT 0,
+                        Counter_F INTEGER DEFAULT 0);
+                    """
+
+        create_decks = """
+                    CREATE TABLE IF NOT EXISTS decks
+                        (D_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                        Name TEXT NOT NULL,
+                        S_ID INTEGER NOT NULL,
+                        FOREIGN KEY (S_ID)
+                            REFERENCES subjects (S_ID));
+                        """
+
+        create_subjects = """
+                    CREATE TABLE IF NOT EXISTS subjects
+                        (S_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                        subject TEXT NOT NULL UNIQUE);
+                            """
+
+        create_deck_lookup = """
+                            CREATE TABLE IF NOT EXISTS deck_lookup
+                            (Pare_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                            D_ID INTEGER NOT NULL,
+                            C_ID INTEGER NOT NULL,
+                            FOREIGN KEY (D_ID)
+                                REFERENCES decks (D_ID)
+                            FOREIGN KEY (C_ID)
+                                REFERENCES cards (C_ID));
+                            """
+
+        self._cursor.execute(create_cards)
+        self._cursor.execute(create_decks)
+        self._cursor.execute(create_subjects)
+        self._cursor.execute(create_deck_lookup)
+
+    def get_cards(self):
+        return list(self._cursor.execute("SELECT * FROM cards;"))
+
+    def get_card(self, c_id: int):
+        return list(self._cursor.execute(f"SELECT * FROM cards WHERE {c_id} == C_ID"))[0]
+
+    def get_decks(self):
+        return list(self._cursor.execute("SELECT * FROM decks;"))
+
+    def _get_deck_id(self, name: str):
+        return list(self._cursor.execute(f"SELECT id FROM decks WHERE {name} == Name"))[0]
+
+    def get_subjects(self):
+        return list(self._cursor.execute("SELECT * FROM subjects;"))
+
+    def get_subject(self, subject: str = None, s_id: str = None):
+        if subject is None:
+            return list(self._cursor.execute(f"SELECT Language from languages WHERE {s_id} == S_ID"))
+
+        elif s_id is None:
+            return list(self._cursor.execute(f"SELECT Language from languages WHERE {subject} == Subject"))
+
+        else:
+            raise AttributeError
+
+    def create_card(self, front, back):
+        query = f"""
+                INSERT INTO cards (Front, Back)
+                VALUES ({front}, {back});
+                """
+
+        self._cursor.execute(query)
+
+    def create_deck(self, name: str, subject: str, cards: list):
+        ids = [card.c_id for card in cards]
+
+        query = f"""
+                INSERT INTO decks (Name, S_ID)
+                VALUES ({name}, {self.get_subject(subject=subject)};
+                """
+
+        self._cursor.execute(query)
+
+        for c_id in ids:
+            self._cursor.execute(f"INSERT INTO deck_lookup (D_ID, C_ID VALUES ({self._get_deck_id(name)}, {c_id}")
+
+    def close_connection(self):
+        self._connection.close()
+
+    def create_dummy_data(self):
+        dummy_subjects = f"""
+                INSERT INTO subjects (subject)
+                VALUES
+                    ("Mathe"),
+                    ("InfT"),
+                    ("Deutsch"),
+                    ("Politik"),
+                    ("Informatik");
+                """
+        dummy_cards = f"""
+                INSERT INTO cards (Front, Back)
+                VALUES
+                    ("Front1", "Back1"),
+                    ("Front2", "Back2"),
+                    ("Front3", "Back3"),
+                    ("Front4", "Back4"),
+                    ("Front5", "Back5"),
+                    ("Front6", "Back6");"""
+
+        self._cursor.execute(dummy_subjects)
+        self._cursor.execute(dummy_cards)
+
+        if len(self.get_subjects()) != 0 and len(self.get_cards()) != 0:
+            return True
+        else:
+            return False
+
+
+#dbh = DBHelper(r"C:\Users\joshu\Desktop\Learnables")
+#dbh.create_dummy_data()
