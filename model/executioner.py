@@ -17,10 +17,17 @@ def build_subjects(subjects: list) -> list:
     return subject_objects
 
 
-def build_decks(deck: list) -> list:
+def build_decks(decks: list, decks_lookup: list, cards: list) -> list:
     deck_objects = []
-    for deck in deck:
-        deck_objects.append(Deck(deck[0], deck[1], deck[2], deck[3]))
+    for deck in decks:
+        lookups = []
+
+        for lookup in decks_lookup:
+            for card in cards:
+                if card.c_id == lookup[2]:
+                    lookups.append(card)
+
+        deck_objects.append(Deck(deck[0], deck[1], deck[2], lookups))
 
     return deck_objects
 

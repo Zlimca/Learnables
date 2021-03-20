@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from view.mainwindow2 import Ui_MainWindow
+from view.main_window import UiMainWindow
 from controller.controller import Controller
 
 
@@ -11,12 +11,11 @@ def close(controller: Controller):
 
 if __name__ == "__main__":
     controller = Controller()
-    #controller.on_startup()
 
     app = QApplication(sys.argv)
     MainWindow = QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow, controller)
+    ui = UiMainWindow()
+    ui.setup_ui(MainWindow, controller)
     MainWindow.show()
 
     sys.exit(close(controller))

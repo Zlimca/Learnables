@@ -11,6 +11,11 @@ class DBHelper:
 
         self.create_db()
 
+    def reestablish_connection(self):
+        self._connection.close()
+        self._connection = sqlite3.connect(self._name)
+        self._cursor = self._connection.cursor()
+
     def create_db(self):
         create_cards = """
                     CREATE TABLE IF NOT EXISTS cards
@@ -65,7 +70,12 @@ class DBHelper:
         return val
 
     def get_decks(self):
-        return list(self._cursor.execute("SELECT * FROM decks;"))
+        decks = self._cursor.execute("SELECT * FROM decks;").fetchall()
+        decks_connections = self._cursor.execute("SELECT * FROM deck_lookup").fetchall()
+        print(decks, "\n")
+        print(decks_connections)
+
+        return decks, decks_connections
 
     def _get_deck_id(self, name: str):
         return list(self._cursor.execute(f"SELECT id FROM decks WHERE Name == '{name}'"))[0]
@@ -86,7 +96,7 @@ class DBHelper:
     def create_card(self, front: str, back: str) -> tuple:
         query = f"INSERT INTO cards (Front, Back) VALUES ('{front}', '{back}');"
         print(query)
-        self._cursor.execute(query)
+        print(self._cursor.execute(query))
         self._connection.commit()
 
         return self.get_card_by_id(self.get_card(front, back)[0])
@@ -113,11 +123,13 @@ class DBHelper:
     def create_dummy_data(self):
         test1 = self.get_subjects()
         test2 = self.get_cards()
+        test3 = self.get_decks()
+        test4 = self._cursor.execute("SELECT * FROM deck_lookup").fetchall()
 
-        if len(test1) != 0 and len(test2) != 0:
+        if len(test1) != 0 and len(test2) != 0 and len(test3) != 0 and len(test4) != 0:
             return
 
-        dummy_subjects = f"""
+        dummy_subjects = """
                 INSERT INTO subjects (subject)
                 VALUES
                     ("Mathe"),
@@ -127,7 +139,7 @@ class DBHelper:
                     ("Informatik");
                 """
 
-        dummy_cards = f"""
+        dummy_cards = """
                 INSERT INTO cards (Front, Back)
                 VALUES
                     ("Front1", "Back1"),
@@ -138,8 +150,28 @@ class DBHelper:
                     ("Front6", "Back6");
                 """
 
+        dummy_decks = """
+                    INSERT INTO decks (Name, S_ID)
+                    VALUES 
+                        ('deck1', 1),
+                        ('deck2', 2),
+                        ('deck3', 3),
+                        ('deck4', 4),
+                        ('deck5', 5);
+                    """
+
+        dummy_deck_lookup = """
+                            INSERT INTO deck_lookup (D_ID, C_ID)
+                            VALUES 
+                                (1, 1),
+                                (1, 2),
+                                (1, 3);
+                            """
+
         self._cursor.execute(dummy_subjects)
         self._cursor.execute(dummy_cards)
+        self._cursor.execute(dummy_decks)
+        self._cursor.execute(dummy_deck_lookup)
 
         if len(self.get_subjects()) != 0 and len(self.get_cards()) != 0:
             self._connection.commit()
