@@ -66,14 +66,14 @@ class DBHelper:
 
     def get_card(self, front: str, back: str):
         query = f"SELECT * FROM cards WHERE (Front == '{front}') and (Back == '{back}')"
-        val = list(self._cursor.execute(query))[0]
+        val = self._cursor.execute(query).fetchall()[0]
         return val
 
     def get_decks(self):
         decks = self._cursor.execute("SELECT * FROM decks;").fetchall()
         decks_connections = self._cursor.execute("SELECT * FROM deck_lookup").fetchall()
-        print(decks, "\n")
-        print(decks_connections)
+        #print(decks, "\n")
+        #print(decks_connections)
 
         return decks, decks_connections
 
@@ -95,8 +95,8 @@ class DBHelper:
 
     def create_card(self, front: str, back: str) -> tuple:
         query = f"INSERT INTO cards (Front, Back) VALUES ('{front}', '{back}');"
-        print(query)
-        print(self._cursor.execute(query))
+        #print(query)
+        self._cursor.execute(query)
         self._connection.commit()
 
         return self.get_card_by_id(self.get_card(front, back)[0])

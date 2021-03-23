@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QRadioButton
 
 
 class Subject:
@@ -49,3 +49,10 @@ class Deck(QLabel):
                 return card
         else:
             return None
+
+
+class DeckRadioButton(QRadioButton):
+    def __init__(self, text, deck: Deck):
+        super().__init__(text)
+
+        self.deck = deck

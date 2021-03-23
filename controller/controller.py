@@ -10,6 +10,7 @@ class Controller(Singleton):
         super().__init__(self)
         self.dbh = db_helper.DBHelper(r".\Learnables")
         self.dbh.create_dummy_data()
+        self.selected_deck = None
 
     def on_startup(self):
         self.subjects: list = executioner.build_subjects(self.dbh.get_subjects())
@@ -37,4 +38,5 @@ class Controller(Singleton):
         return new_card_object
 
     def add_deck(self, card: Card):
+        self.dbh.reestablish_connection()
         pass

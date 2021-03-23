@@ -9,8 +9,10 @@
 
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QInputDialog
+from PyQt5.QtWidgets import QInputDialog, QDialogButtonBox, QWidget, QButtonGroup, QVBoxLayout, QRadioButton, QDialog
 from PyQt5.QtCore import Qt
+from model.parts import DeckRadioButton
+from .dialog import SelectionDialog
 
 
 class UiMainWindow(object):
@@ -57,7 +59,7 @@ class UiMainWindow(object):
         self.startVLayout.addItem(spacerItem2)
 
         self.btn_learn = QtWidgets.QPushButton(self.startPage)
-        self.btn_learn.clicked.connect(lambda: self.mainWidget.setCurrentIndex(3))
+        self.btn_learn.clicked.connect(self.open_learn)
         self.btn_learn.setObjectName("button_learn")
         self.startVLayout.addWidget(self.btn_learn)
 
@@ -141,6 +143,8 @@ class UiMainWindow(object):
         self.decksContents = QtWidgets.QWidget()
         self.decksContents.setGeometry(QtCore.QRect(0, 0, 447, 507))
         self.decksContents.setObjectName("decks_contents")
+        self.cardsScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.cardsScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.decksScrollArea.setWidget(self.decksContents)
         self.decksContentLayout.addWidget(self.decksScrollArea)
 
@@ -279,15 +283,15 @@ class UiMainWindow(object):
         self.cardsContent.setLayout(vbox)
 
     def add_card(self):
-        print(f"{self.controller.get_cards()}\n")
+        #print(f"{self.controller.get_cards()}\n")
         front, ok = QInputDialog.getText(self.mainWidget, "Neue Karte erstellen", "Vorderseite: ")
-        print(front)
+        #print(front)
         if ok:
             back, ok = QInputDialog.getText(self.mainWidget, "Neue Karte erstellen", "Rückseite: ")
-            print(back)
+            #print(back)
             if ok:
                 new_card = self.controller.add_card(front, back)
-                print(f"front {front}, back {back}, card: {new_card}")
+                #print(f"front {front}, back {back}, card: {new_card}")
                 self.cardsContent.layout().addWidget(new_card)
                 self.cardsContent.update()
 
@@ -297,7 +301,7 @@ class UiMainWindow(object):
         vbox = QtWidgets.QVBoxLayout()
 
         for deck in decks:
-            print(deck)
+            #print(deck)
             vbox.addWidget(deck)
 
         self.cardsContent.setLayout(vbox)
@@ -307,6 +311,12 @@ class UiMainWindow(object):
 
     def add_card_to_deck(self):
         pass
+
+    def open_learn(self):
+        SelectionDialog(self.controller.get_decks(), self.controller)
+        self.dummy_label.setText(self.controller.selected_deck.cards[0])
+        self.verticalLayout_1.update()
+        self.mainWidget.setCurrentIndex(3)
 
     def back(self):
         pass
