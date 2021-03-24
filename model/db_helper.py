@@ -101,8 +101,26 @@ class DBHelper:
 
         return self.get_card_by_id(self.get_card(front, back)[0])
 
-    def create_deck(self, name: str, subject: str, cards: list):
-        ids = [card.c_id for card in cards]
+    def increment_r(self, card):
+        query = f"""
+                        UPDATE cards
+                        SET Counter_C = {card.counter_r}
+                        WHERE {card.c_id} == C_ID
+                        """
+        self._cursor.execute(query)
+        self._connection.commit()
+
+    def increment_w(self, card):
+        query = f"""
+                UPDATE cards
+                SET Counter_F = {card.counter_w}
+                WHERE {card.c_id} == C_ID
+                """
+        self._cursor.execute(query)
+        self._connection.commit()
+
+    def create_deck(self, name: str, subject: str, *cards: list):
+        #ids = [card.c_id for card in cards]
 
         query = f"""
                 INSERT INTO decks (Name, S_ID)
@@ -111,8 +129,8 @@ class DBHelper:
 
         self._cursor.execute(query)
 
-        for c_id in ids:
-            self._cursor.execute(f"INSERT INTO deck_lookup (D_ID, C_ID VALUES ('{self._get_deck_id(name)}', '{c_id}'")
+        #for c_id in ids:
+            #self._cursor.execute(f"INSERT INTO deck_lookup (D_ID, C_ID VALUES ('{self._get_deck_id(name)}', '{c_id}'")
 
         self._connection.commit()
 
@@ -147,7 +165,14 @@ class DBHelper:
                     ("Front3", "Back3"),
                     ("Front4", "Back4"),
                     ("Front5", "Back5"),
-                    ("Front6", "Back6");
+                    ("Front6", "Back6"),
+                    ("Front7", "Back7"),
+                    ("Front8", "Back8"),
+                    ("Front9", "Back9"),
+                    ("Front10", "Back10"),
+                    ("Front11", "Back11"),
+                    ("Front12", "Back12"),
+                    ("Front13", "Back13");
                 """
 
         dummy_decks = """
@@ -165,7 +190,13 @@ class DBHelper:
                             VALUES 
                                 (1, 1),
                                 (1, 2),
-                                (1, 3);
+                                (1, 3),
+                                (1, 4),
+                                (1, 5),
+                                (1, 6),
+                                (1, 7),
+                                (1, 10),
+                                (1, 12);
                             """
 
         self._cursor.execute(dummy_subjects)

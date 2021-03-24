@@ -10,7 +10,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog
-
 from controller.controller import Controller
 from model.parts import DeckRadioButton
 
@@ -67,12 +66,12 @@ class SelectionDialog(QDialog):
         self.re_translate_ui()
         self.buttonBox.accepted.connect(self.accept)
         self.accepted.connect(self.checked)
-        #self.buttonBox.rejected.connect(self.reject)
+        self.buttonBox.rejected.connect(self.reject)
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def re_translate_ui(self):
         _translate = QtCore.QCoreApplication.translate
-        self.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.setWindowTitle(_translate("Choose Deck", "Deckauswahl"))
 
     def checked(self):
         if selected_button := self.btn_group.checkedButton():

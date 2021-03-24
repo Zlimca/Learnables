@@ -17,7 +17,7 @@ def build_subjects(subjects: list) -> list:
     return subject_objects
 
 
-def build_decks(decks: list, decks_lookup: list, cards: list) -> list:
+def build_decks(decks: list, decks_lookup: list, cards: list, subjects: list) -> list:
     deck_objects = []
     for deck in decks:
         lookups = []
@@ -27,7 +27,10 @@ def build_decks(decks: list, decks_lookup: list, cards: list) -> list:
                 if card.c_id == lookup[2]:
                     lookups.append(card)
 
-        deck_objects.append(Deck(deck[0], deck[1], deck[2], lookups))
+        for subject in subjects:
+            if subject.s_id == deck[2]:
+                deck_objects.append(Deck(deck[0], deck[1], subject, lookups))
+                break
 
     return deck_objects
 
